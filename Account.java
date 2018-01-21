@@ -19,12 +19,12 @@ import java.util.TreeMap;
 public class Account {
 
 	/**
-     *  deposit type of balance modification is ASCII value of +
+         *  deposit type of balance modification is ASCII value of +
 	 */
 	final int DEPOSIT = 43;
 	
 	/**
-     *  withdraw type of balance modification is ASCII value of -
+         *  withdraw type of balance modification is ASCII value of -
 	 */
 	final int WITHDRAW = 45;
 	
@@ -75,7 +75,7 @@ public class Account {
 	 * Maximum is Integer.MAX_VALUE
 	 */
 	public void withdraw(int withdrawValue){
-        if (withdrawValue <=0) return;
+               if (withdrawValue <=0) return;
 		
 		// set key
 		LocalDateTime currentTime = LocalDateTime.now();
