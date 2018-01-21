@@ -2,12 +2,16 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
+import java.util.Map.Entry;
 import java.util.TreeMap;
 
 
 /**
+ * 
+ * solution for task: http://kata-log.rocks/banking-kata
+ * 
  * compiled with java 1.8
+ * 
  * @author Margrit Atalla
  *
  */
@@ -95,7 +99,6 @@ public class Account {
 	 * which is sorted by date of balance operation
 	 * @return history table of balance changes
 	 */
-	@SuppressWarnings("rawtypes")	
 	public String printStatement(){
 		
 		// initialization
@@ -108,23 +111,25 @@ public class Account {
 		historyTable.append(tableHeader+"\n");
         
 		// fill rows from changeHistory map ordered by balance change time stamp
-		Set set = changeHistory.entrySet();
-		Iterator iterator = set.iterator();
-        while(iterator.hasNext()) {      	
-        	Map.Entry tableRow = (Map.Entry)iterator.next();
-        	// date of deposit or withdraw
+		Iterator<Entry<LocalDateTime, int[]>> iterator = changeHistory.entrySet().iterator();
+           while(iterator.hasNext()) {      	
+        	Map.Entry<LocalDateTime, int[]> tableRow = iterator.next();
+        	
+        	// time stamp of deposit or withdrawel in date format
         	String formattedDate=((LocalDateTime)tableRow.getKey()).format(formatter);
         	historyTable.append(formattedDate+"  ");
         	
         	int[] balanceChangeValues = (int[])tableRow.getValue();
         	// '+' ( deposit ) or '-' (withdraw )
         	historyTable.append((char)balanceChangeValues[0]);
+        	
         	// balance change value can have at most 10 positions due to int MAX_VALUE 
         	String balanceChange = String.format("%-10d", balanceChangeValues[1]);
         	historyTable.append(balanceChange);
+        	
         	// balance value after change
         	historyTable.append(balanceChangeValues[2]+"\n");
-        }
+           }
         
         result=historyTable.toString();
         return result;
