@@ -1,3 +1,4 @@
 # AccountExample
-contains a Java class file Account.java
-implements a change history and a balance for a bank account
+contains a the solution for the task http://kata-log.rocks/banking-kata
+Account.java implements  a balance and a balance change history for a bank account
+TestAccount.java tests the public methods of Account.java
