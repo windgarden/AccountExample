@@ -1,16 +1,17 @@
+package AccountExample;
+
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Map.Entry;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
+
 
 
 /**
  * 
  * solution for task: http://kata-log.rocks/banking-kata
- * 
- * compiled with java 1.8
  * 
  * @author Margrit Atalla
  *
@@ -19,120 +20,71 @@ import java.util.TreeMap;
 public class Account {
 
 	/**
-         *  deposit type of balance modification is ASCII value of +
-	 */
-	final int DEPOSIT = 43;
-	
-	/**
-         *  withdraw type of balance modification is ASCII value of -
-	 */
-	final int WITHDRAW = 45;
-	
-	/**
-	 * Long key: date of deposit or withdraw
-	 * int[] values:
-	 * index 0: type of change: deposit (43) , withdraw (45)
-	 * index 1: balance change value
+	 * LocalDateTime key: time stamp of deposit or withdrawal
+	 * ArrayList contents:
+	 * index 1: balance change amount
 	 * index 2: new balance after change
 	 */
-	private TreeMap<LocalDateTime,int[]> changeHistory=new TreeMap<LocalDateTime,int[]>();
-	
+	private TreeMap<LocalDateTime,ArrayList<Integer>> _balanceHistory=new TreeMap<LocalDateTime,ArrayList<Integer>>();
+
 	/**
 	 * current balance of account, initial value is 0
 	 */
-	private int currentBalance=0;
-	
+	private int _currentBalance=0;
+
 	/**
-	 * increases balance of account by depositValue
-	 * and stores the balance in the change history
-	 * @param depositValue must be greater 0, otherwise it is ignored. 
-	 * Maximum is Integer.MAX_VALUE
+	 * increases balance of account by amount
+	 * and stores the balance change in the history
+	 * @param amount must be greater 0, otherwise it is ignored. 
 	 */
-	public void deposit(int depositValue){
-		if (depositValue <=0) return;
-		
-		// set key
-		LocalDateTime currentTime = LocalDateTime.now();
-		
-		// set value
-		int[] entry=new int[3];
-		entry[0]=DEPOSIT;
-		entry[1]=depositValue;
-		entry[2]=currentBalance+depositValue;
-		
+	public void deposit(int amount){
+		if (amount <=0) return;
+
 		// add entry to balance change history
-		changeHistory.put(currentTime, entry);
-		
-		// update balance
-		currentBalance+=depositValue;
-		
+		_balanceHistory.put(LocalDateTime.now(), 
+				new ArrayList<Integer>(Arrays.asList(amount,_currentBalance+amount)));
+
+		// increase balance
+		_currentBalance+=amount;
+
 	}
 
 	/**
-	 * decreases balance of account by withdrawValue
-	 * and stores the balance change in the change history
-	 * @param withdrawValue must be greater 0, otherwise it is ignored.
-	 * Maximum is Integer.MAX_VALUE
+	 * decreases balance of account by amount
+	 * and stores the balance change in the history
+	 * @param amount must be greater 0, otherwise it is ignored.
 	 */
-	public void withdraw(int withdrawValue){
-               if (withdrawValue <=0) return;
-		
-		// set key
-		LocalDateTime currentTime = LocalDateTime.now();
-		
-		// set value
-		int[] entry=new int[3];
-		entry[0]=WITHDRAW;
-		entry[1]=withdrawValue;
-		entry[2]=currentBalance-withdrawValue;
-		
-		// add entry to change history
-		changeHistory.put(currentTime, entry);
-		
-		// update balance
-		currentBalance-=withdrawValue;
+	public void withdraw(int amount){
+		if (amount <=0) return;
+
+		// add entry to balance change history
+		_balanceHistory.put(LocalDateTime.now(), 
+				new ArrayList<Integer>(Arrays.asList(-amount,_currentBalance-amount)));
+
+		// decrease balance
+		_currentBalance-=amount;
 	}
-	
-	
+
+
 	/**
-	 * fills the result with the contents of the changeHistory map,
-	 * which is sorted by date of balance operation
+	 * fills the result with the contents of the balance history map,
+	 * which is sorted by time stamp of balance change operation
+	 * if the map is empty, only the header text is returned
 	 * @return history table of balance changes
 	 */
 	public String printStatement(){
-		
-		// initialization
-		String result="";	
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
-		String tableHeader="Date        Amount     Balance";		
-		StringBuffer historyTable=new StringBuffer();
-		
-		// fill header line
-		historyTable.append(tableHeader+"\n");
-        
-		// fill rows from changeHistory map ordered by balance change time stamp
-		Iterator<Entry<LocalDateTime, int[]>> iterator = changeHistory.entrySet().iterator();
-           while(iterator.hasNext()) {      	
-        	Map.Entry<LocalDateTime, int[]> tableRow = iterator.next();
-        	
-        	// time stamp of deposit or withdrawel in date format
-        	String formattedDate=((LocalDateTime)tableRow.getKey()).format(formatter);
-        	historyTable.append(formattedDate+"  ");
-        	
-        	int[] balanceChangeValues = (int[])tableRow.getValue();
-        	// '+' ( deposit ) or '-' (withdraw )
-        	historyTable.append((char)balanceChangeValues[0]);
-        	
-        	// balance change value can have at most 10 positions due to int MAX_VALUE 
-        	String balanceChange = String.format("%-10d", balanceChangeValues[1]);
-        	historyTable.append(balanceChange);
-        	
-        	// balance value after change
-        	historyTable.append(balanceChangeValues[2]+"\n");
-           }
-        
-        result=historyTable.toString();
-        return result;
+
+		// collect rows
+		String rows=_balanceHistory.entrySet()
+				.stream()
+				.map(entry -> entry.getKey().format(DateTimeFormatter.ofPattern("dd.MM.yyyy  "))
+						+String.format("%-+11d",entry.getValue().get(0))
+						+entry.getValue().get(1))
+						.collect(Collectors.joining("\n"));
+
+		return "Date        Amount     Balance\n"+rows; 
+
+
 	}
-	
+
 }
